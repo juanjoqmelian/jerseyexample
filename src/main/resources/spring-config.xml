@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+                           http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		                    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/data/repository
+                           http://www.springframework.org/schema/data/repository/spring-repository-1.5.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.drago.jerseyexample"/>
+
+
+    <!-- mongo configuration -->
+    <mongo:mongo host="localhost" port="27017" />
+    <mongo:db-factory dbname="yourdb" />
+
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+    </bean>
+
+    <mongo:repositories base-package="com.drago.jerseyexample" mongo-template-ref="mongoTemplate"/>
+
+    <!-- Factory bean that creates the Mongo instance -->
+    <bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
+        <property name="host" value="localhost"/>
+    </bean>
+
+    <!-- end mongo configuration -->
+
+    <!-- database connection configuration -->
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost/jerseyexample"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+        <property name="initialSize" value="3" />
+        <property name="maxActive" value="10" />
+    </bean>
+
+    <!-- end of database connection configuration -->
+
+    <!-- ORM framework configuration -->
+
+    <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+
+
+        <property name="packagesToScan" value="com.drago.jerseyexample"></property>
+
+        <property name="dataSource" ref="dataSource"/>
+
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="false"/>
+                <property name="generateDdl" value="true"/>
+            </bean>
+        </property>
+
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">create</prop>
+            </props>
+        </property>
+    </bean>
+
+
+    <!-- transaction management definition -->
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+
+    <jpa:repositories base-package="com.drago.jerseyexample.jpa.repository" query-lookup-strategy="use-declared-query"/>
+
+</beans>
