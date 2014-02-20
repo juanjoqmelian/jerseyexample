@@ -32,10 +32,11 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class RecordResourceTest {
+    
 
     private static final String TEST_ID = "a02";
 
-    private RecordResource mockResource;
+    private RecordResource recordResource;
 
     public RecordService mockService;
 
@@ -44,11 +45,11 @@ public class RecordResourceTest {
 
     @Before
     public void setUp(){
-        mockResource = new RecordResource();
+        recordResource = new RecordResource();
         mockService = mock(RecordService.class);
         mockUriInfo = mock(UriInfo.class);
-        mockResource.setService(mockService);
-        mockResource.setUriInfo(mockUriInfo);
+        recordResource.setService(mockService);
+        recordResource.setUriInfo(mockUriInfo);
     }
 
 
@@ -59,7 +60,7 @@ public class RecordResourceTest {
 
         when(mockService.getAll()).thenReturn(records);
 
-        Response response = mockResource.getAll();
+        Response response = recordResource.getAll();
 
         assertThat(response.getStatus(), is(HttpStatus.OK.value()));
 
@@ -78,7 +79,7 @@ public class RecordResourceTest {
         when(mockService.create(argThat(isRecord(null, 7)))).thenReturn(TEST_ID);
         when(mockUriInfo.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath("http://localhost:8080/services/webapi/myresource"));
 
-        Response response = mockResource.createRecord(recordPayload);
+        Response response = recordResource.createRecord(recordPayload);
 
         assertThat(response.getLocation().toString(), is("http://localhost:8080/services/webapi/myresource/a02"));
         assertThat(response.getStatus(), is(HttpStatus.CREATED.value()));
@@ -91,7 +92,7 @@ public class RecordResourceTest {
         when(mockService.get(argThat(isString(TEST_ID)))).thenReturn(Record.instanceOf(10));
         when(mockService.update(argThat(isRecord(TEST_ID, 10)))).thenReturn(Record.instanceOf(10));
 
-        Response response = mockResource.updateRecord(TEST_ID, recordPayload);
+        Response response = recordResource.updateRecord(TEST_ID, recordPayload);
 
         assertThat(response.getStatus(), is(HttpStatus.NOT_MODIFIED.value()));
     }
@@ -104,7 +105,7 @@ public class RecordResourceTest {
 
         when(mockService.get(argThat(isString(TEST_ID)))).thenReturn(record);
 
-        Response response = mockResource.getRecord(TEST_ID);
+        Response response = recordResource.getRecord(TEST_ID);
 
         assertThat(response.getStatus(), is(HttpStatus.OK.value()));
 
@@ -120,7 +121,7 @@ public class RecordResourceTest {
 
         when(mockService.get(argThat(isString(TEST_ID)))).thenReturn(Record.instanceOf(10));
 
-        Response response = mockResource.deleteRecord(TEST_ID);
+        Response response = recordResource.deleteRecord(TEST_ID);
 
         verify(mockService, times(1)).delete(argThat(isString(TEST_ID)));
 
@@ -134,7 +135,7 @@ public class RecordResourceTest {
 
         when(mockService.get(argThat(isString(TEST_ID)))).thenReturn(null);
 
-        Response response = mockResource.updateRecord(TEST_ID, RecordPayload.instanceOf(11));
+        Response response = recordResource.updateRecord(TEST_ID, RecordPayload.instanceOf(11));
 
         assertThat(response.getStatus(), is(HttpStatus.NOT_FOUND.value()));
 
@@ -145,7 +146,7 @@ public class RecordResourceTest {
 
         when(mockService.get(argThat(isString(TEST_ID)))).thenReturn(null);
 
-        Response response = mockResource.getRecord(TEST_ID);
+        Response response = recordResource.getRecord(TEST_ID);
 
         RecordPayload recordPayload = (RecordPayload) response.getEntity();
 
@@ -160,7 +161,7 @@ public class RecordResourceTest {
 
         when(mockService.get(argThat(isString(TEST_ID)))).thenReturn(null);
 
-        Response response = mockResource.deleteRecord(TEST_ID);
+        Response response = recordResource.deleteRecord(TEST_ID);
 
         assertThat(response.getStatus(), is(HttpStatus.NOT_FOUND.value()));
 
